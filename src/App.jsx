@@ -96,6 +96,29 @@ const MapTabIcon = () => (
   </svg>
 )
 
+const DocsTabIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+  </svg>
+)
+
+const PdfIcon = ({ color }) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+  </svg>
+)
+
+const ArrowUpRightIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <line x1="7" y1="17" x2="17" y2="7" />
+    <polyline points="7 7 17 7 17 17" />
+  </svg>
+)
+
 const CheckIcon = () => (
   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12" />
@@ -538,12 +561,193 @@ function DayView({ day, onPhotoClick }) {
   )
 }
 
+// ─── Documents Page ────────────────────────────────────────────────────────────
+
+const DOCS = [
+  {
+    id: 'hotel',
+    emoji: '🏨',
+    label: 'Hotel',
+    color: '#6366f1',
+    files: [
+      { name: 'Booking Confirmation', url: '/docs/hotel-confirmation.pdf' },
+      { name: 'Receipt', url: '/docs/hotel-receipt.pdf' },
+    ],
+  },
+  {
+    id: 'disneyland',
+    emoji: '🎢',
+    label: 'Disneyland',
+    color: '#e11d48',
+    files: [
+      { name: 'Booking Confirmation', url: '/docs/disneyland-confirmation.pdf' },
+      { name: 'Ticket · Person 1', url: '/docs/disneyland-ticket-1.pdf' },
+      { name: 'Ticket · Person 2', url: '/docs/disneyland-ticket-2.pdf' },
+      { name: 'Ticket · Person 3', url: '/docs/disneyland-ticket-3.pdf' },
+    ],
+  },
+  {
+    id: 'turbojet',
+    emoji: '⛴️',
+    label: 'Turbojet (Macau Ferry)',
+    color: '#0ea5e9',
+    files: [
+      { name: 'Ticket · Person 1', url: '/docs/turbojet-1.pdf' },
+      { name: 'Ticket · Person 2', url: '/docs/turbojet-2.pdf' },
+    ],
+  },
+  {
+    id: 'ngong-ping',
+    emoji: '🚡',
+    label: 'Ngong Ping 360',
+    color: '#10b981',
+    files: [
+      { name: 'Cable Car Ticket', url: '/docs/ngong-ping.pdf' },
+    ],
+  },
+  {
+    id: 'harbor-cruise',
+    emoji: '🚢',
+    label: 'Harbor Cruise',
+    color: '#f59e0b',
+    files: [
+      { name: 'Cruise Ticket', url: '/docs/harbor-cruise.pdf' },
+    ],
+  },
+  {
+    id: 'peak-tram',
+    emoji: '🚋',
+    label: 'Peak Tram',
+    color: '#8b5cf6',
+    files: [
+      { name: 'E-Ticket · 1', url: '/docs/ticket-1.pdf' },
+      { name: 'E-Ticket · 2', url: '/docs/ticket-2.pdf' },
+      { name: 'Receipt', url: '/docs/ticket-receipt.pdf' },
+    ],
+  },
+  {
+    id: 'octopus',
+    emoji: '🐙',
+    label: 'Octopus Card',
+    color: '#f97316',
+    files: [
+      { name: 'Octopus Card Voucher', url: '/docs/octopus-card.pdf' },
+    ],
+  },
+  {
+    id: 'itinerary',
+    emoji: '📋',
+    label: 'Full Itinerary',
+    color: '#64748b',
+    files: [
+      { name: 'Hong Kong Itinerary PDF', url: '/docs/itinerary.pdf' },
+    ],
+  },
+]
+
+function DocCategory({ cat }) {
+  const [open, setOpen] = useState(true)
+  return (
+    <div
+      className="bg-white rounded-2xl overflow-hidden"
+      style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)' }}
+    >
+      {/* Category header */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-3 px-4 py-3.5 active:bg-stone-50 transition-colors text-left"
+      >
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+          style={{ background: `${cat.color}18` }}
+        >
+          {cat.emoji}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] font-extrabold text-stone-800">{cat.label}</p>
+          <p className="text-[11px] text-stone-400">{cat.files.length} document{cat.files.length !== 1 ? 's' : ''}</p>
+        </div>
+        <div
+          className="text-stone-400 transition-transform duration-200"
+          style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
+      </button>
+
+      {/* File list */}
+      {open && (
+        <div style={{ borderTop: '1px solid #f5f5f4' }}>
+          {cat.files.map((file, i) => (
+            <a
+              key={i}
+              href={file.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-4 py-3 active:bg-stone-50 transition-colors"
+              style={i < cat.files.length - 1 ? { borderBottom: '1px solid #f5f5f4' } : {}}
+            >
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: `${cat.color}12` }}
+              >
+                <PdfIcon color={cat.color} />
+              </div>
+              <span className="flex-1 text-[13px] font-semibold text-stone-700">{file.name}</span>
+              <div
+                className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full flex-shrink-0"
+                style={{ background: `${cat.color}12`, color: cat.color }}
+              >
+                <ArrowUpRightIcon />
+                Open
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DocsPage() {
+  const totalDocs = DOCS.reduce((sum, c) => sum + c.files.length, 0)
+  return (
+    <div style={{ animation: 'fadeSlideUp 0.32s ease both' }}>
+      {/* Header */}
+      <div
+        className="px-5 pt-5 pb-6"
+        style={{ background: 'linear-gradient(to bottom, rgba(255,241,242,0.9) 0%, rgba(250,248,245,0) 100%)' }}
+      >
+        <p className="text-[10px] font-black text-rose-400 uppercase tracking-[0.22em] mb-2">YOUR FILES</p>
+        <div className="flex items-end justify-between gap-3">
+          <h2 className="text-2xl font-black text-stone-900 leading-tight">Trip Documents</h2>
+          <div
+            className="flex-shrink-0 mb-1 px-2.5 py-1 rounded-full text-[11px] font-bold text-rose-500"
+            style={{ background: 'rgba(225,29,72,0.08)', border: '1px solid rgba(225,29,72,0.15)' }}
+          >
+            {totalDocs} files
+          </div>
+        </div>
+        <p className="text-[12px] text-stone-400 mt-1.5">All bookings & tickets in one place</p>
+      </div>
+
+      {/* Categories */}
+      <div className="px-5 pb-8 flex flex-col gap-3">
+        {DOCS.map(cat => <DocCategory key={cat.id} cat={cat} />)}
+      </div>
+    </div>
+  )
+}
+
 // ─── Bottom Nav ────────────────────────────────────────────────────────────────
 
 function BottomNav({ activePage, onSelect }) {
   const tabs = [
     { id: 'trip', label: 'Itinerary', Icon: ItineraryTabIcon },
     { id: 'map',  label: 'Map',       Icon: MapTabIcon },
+    { id: 'docs', label: 'Docs',      Icon: DocsTabIcon },
   ]
   return (
     <nav
@@ -685,6 +889,11 @@ export default function App() {
           {page === 'trip' && (
             <DayTabs days={itinerary} activeDay={activeDay} onSelect={setActiveDay} />
           )}
+          {page === 'docs' && (
+            <div className="px-5 py-3 text-[11px] font-semibold text-stone-400">
+              Tap any file to open it
+            </div>
+          )}
 
           {/* Rose accent stripe */}
           <div style={{ height: 2, background: 'linear-gradient(90deg, #fb7185, #e11d48 50%, #fda4af)' }} />
@@ -698,6 +907,7 @@ export default function App() {
             <DayView key={activeDay} day={currentDay} onPhotoClick={setSelectedStop} />
           )}
           {page === 'map' && <MapPage />}
+          {page === 'docs' && <DocsPage />}
         </div>
       </main>
 
