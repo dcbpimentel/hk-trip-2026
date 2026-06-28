@@ -16,8 +16,10 @@ export default defineConfig({
         enabled: true,
       },
       workbox: {
-        // Pre-cache everything the app shell needs: JS, CSS, HTML, bundled photos
-        globPatterns: ['**/*.{js,css,html,jpg,png,svg,woff2,webp,ico}'],
+        // Pre-cache everything the app shell needs: JS, CSS, HTML, bundled photos, PDFs
+        globPatterns: ['**/*.{js,css,html,jpg,png,svg,woff2,webp,ico,pdf}'],
+        // Don't serve index.html for PDF navigation requests — let them through to the file
+        navigateFallbackDenylist: [/^\/docs\//],
         runtimeCaching: [
           // Google Maps requires network — don't cache, fail gracefully
           {
