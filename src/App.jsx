@@ -3,24 +3,18 @@ import { itinerary, HOTEL } from './data/itinerary'
 import DayMap from './components/DayMap'
 import AllStopsMap, { DAY_COLORS } from './components/AllStopsMap'
 
-// ─── Gallery helpers ───────────────────────────────────────────────────────────
-
-function getGalleryPhotos(stop) {
-  return [...(stop.photos || []), ...(stop.galleryPhotos || [])]
-}
-
 // ─── Trip status ───────────────────────────────────────────────────────────────
 
 function getTripStatus() {
   const today = new Date(); today.setHours(0, 0, 0, 0)
-  const start = new Date(2026, 5, 29) // June 29
-  const end   = new Date(2026, 6, 3)  // July 3
+  const start = new Date(2026, 5, 29)
+  const end   = new Date(2026, 6, 3)
   const daysUntil = Math.round((start - today) / 86400000)
-  if (daysUntil > 1)  return { label: `${daysUntil} days to go`, emoji: '✈️', variant: 'stone' }
-  if (daysUntil === 1) return { label: 'Tomorrow!',               emoji: '🎉', variant: 'amber' }
-  if (daysUntil === 0) return { label: 'Trip starts today!',      emoji: '🚀', variant: 'rose' }
-  if (today <= end)    return { label: 'Trip is on! 🇭🇰',         emoji: '',   variant: 'rose' }
-  return { label: 'Trip complete', emoji: '🏠', variant: 'stone' }
+  if (daysUntil > 1)  return { label: `${daysUntil} days to go`, emoji: '✈️', variant: 'neutral' }
+  if (daysUntil === 1) return { label: 'Tomorrow!',              emoji: '🎉', variant: 'blue' }
+  if (daysUntil === 0) return { label: 'Trip starts today!',     emoji: '🚀', variant: 'blue' }
+  if (today <= end)    return { label: 'Happening now 🇭🇰',      emoji: '',   variant: 'blue' }
+  return { label: 'Trip complete', emoji: '🏠', variant: 'neutral' }
 }
 
 function getDayStatus(day) {
@@ -30,7 +24,7 @@ function getDayStatus(day) {
   const diff = Math.round((dayDate - today) / 86400000)
   if (diff === 0) return 'today'
   if (diff === 1) return 'tomorrow'
-  if (diff < 0)   return 'past'
+  if (diff < 0)  return 'past'
   return null
 }
 
@@ -62,21 +56,9 @@ const SpinnerIcon = () => (
 )
 
 const MapRouteIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
     <path d="M8 21v-2M16 21v-2M9 11l3 3 3-3" />
-  </svg>
-)
-
-const ChevronLeftIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="15 18 9 12 15 6" />
-  </svg>
-)
-
-const CameraIcon = () => (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2zm-11-3a4 4 0 100-8 4 4 0 000 8zm0-2a2 2 0 110-4 2 2 0 010 4z" />
   </svg>
 )
 
@@ -153,112 +135,12 @@ function shortDate(dateStr) {
   return parts.slice(0, 2).join(' ')
 }
 
-// ─── Photo Gallery ─────────────────────────────────────────────────────────────
-
-function GalleryPhoto({ src, alt, onLoad, hero }) {
-  const [failed, setFailed] = useState(false)
-  if (failed) return null
-  if (hero) {
-    return (
-      <img
-        src={src} alt={alt} loading="lazy" decoding="async"
-        onLoad={onLoad} onError={() => setFailed(true)}
-        style={{ width: '100%', display: 'block', aspectRatio: '16/9', objectFit: 'cover' }}
-      />
-    )
-  }
-  return (
-    <div style={{ breakInside: 'avoid', marginBottom: 3, borderRadius: 10, overflow: 'hidden' }}>
-      <img
-        src={src} alt={alt} loading="lazy" decoding="async"
-        onLoad={onLoad} onError={() => setFailed(true)}
-        style={{ width: '100%', display: 'block' }}
-      />
-    </div>
-  )
-}
-
-function PhotoGalleryModal({ stop, onClose }) {
-  const photos = getGalleryPhotos(stop)
-  const [loadedCount, setLoadedCount] = useState(0)
-  const inc = () => setLoadedCount(n => n + 1)
-  const [hero, ...rest] = photos
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col"
-      style={{
-        background: '#080808',
-        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-        animation: 'slideUpFull 0.32s cubic-bezier(0.32, 0.72, 0, 1) both',
-      }}
-    >
-      {/* Header */}
-      <div
-        className="flex-shrink-0 flex items-center gap-3 px-4"
-        style={{
-          paddingTop: 'max(16px, env(safe-area-inset-top))',
-          paddingBottom: 14,
-          background: 'linear-gradient(to bottom, rgba(8,8,8,1) 60%, rgba(8,8,8,0))',
-          position: 'relative',
-          zIndex: 1,
-        }}
-      >
-        <button
-          onClick={onClose}
-          className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white transition-opacity active:opacity-60"
-          style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)' }}
-          aria-label="Back"
-        >
-          <ChevronLeftIcon />
-        </button>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-white font-bold text-[15px] leading-snug truncate">{stop.name}</h2>
-          <p className="text-[11px] font-medium mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
-            {loadedCount > 0 ? `${loadedCount} photo${loadedCount !== 1 ? 's' : ''}` : 'Loading…'}
-          </p>
-        </div>
-      </div>
-
-      {/* Scrollable gallery */}
-      <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        {photos.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: 'rgba(255,255,255,0.25)', fontSize: 14 }}>
-            No photos available
-          </div>
-        ) : (
-          <>
-            {/* Hero — full-width cinematic */}
-            {hero && <GalleryPhoto hero src={hero} alt={`${stop.name} hero`} onLoad={inc} />}
-
-            {/* Masonry grid for remaining photos */}
-            {rest.length > 0 && (
-              <div
-                style={{
-                  columns: 2,
-                  columnGap: 3,
-                  padding: '3px 3px',
-                  paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
-                }}
-              >
-                {rest.map((url, i) => (
-                  <GalleryPhoto key={i} src={url} alt={`${stop.name} ${i + 2}`} onLoad={inc} />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
-
 // ─── Day Tabs ──────────────────────────────────────────────────────────────────
 
 function DayTabs({ days, activeDay, onSelect }) {
   return (
     <div
-      className="flex gap-2 px-4 py-3 overflow-x-auto"
+      className="flex gap-1.5 px-4 py-2.5 overflow-x-auto"
       style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
     >
       {days.map((day) => {
@@ -269,31 +151,32 @@ function DayTabs({ days, activeDay, onSelect }) {
             key={day.day}
             onClick={() => onSelect(day.day)}
             className={[
-              'flex-shrink-0 flex flex-col items-center justify-center px-4 rounded-2xl min-w-[64px] min-h-[56px] transition-all duration-200 select-none relative',
+              'flex-shrink-0 flex flex-col items-center justify-center px-3.5 rounded-2xl min-w-[60px] min-h-[52px] transition-all duration-200 select-none relative',
               isActive
                 ? 'text-white'
                 : dayStatus === 'past'
-                ? 'bg-stone-100 text-stone-400 border border-stone-200'
-                : 'bg-white text-stone-500 border border-stone-200 active:bg-stone-50',
+                ? 'text-[#8E8E93]'
+                : 'text-[#3C3C43] active:opacity-70',
             ].join(' ')}
             style={isActive ? {
-              background: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)',
-              boxShadow: '0 6px 20px rgba(225, 29, 72, 0.35)',
-            } : {}}
+              background: '#007AFF',
+              boxShadow: '0 4px 14px rgba(0,122,255,0.35)',
+            } : {
+              background: dayStatus === 'past' ? 'rgba(142,142,147,0.1)' : 'white',
+              border: '1px solid rgba(60,60,67,0.1)',
+            }}
           >
-            {/* Status micro-label */}
             {dayStatus === 'today' && (
-              <span className={`text-[8px] font-black uppercase tracking-wider mb-0.5 ${isActive ? 'text-rose-200' : 'text-rose-400'}`}>TODAY</span>
+              <span className={`text-[8px] font-black uppercase tracking-wider mb-0.5 ${isActive ? 'text-blue-100' : 'text-[#007AFF]'}`}>TODAY</span>
             )}
             {dayStatus === 'tomorrow' && (
-              <span className={`text-[8px] font-black uppercase tracking-wider mb-0.5 ${isActive ? 'text-rose-100' : 'text-amber-400'}`}>TMRW</span>
+              <span className={`text-[8px] font-black uppercase tracking-wider mb-0.5 ${isActive ? 'text-blue-100' : 'text-[#007AFF]'}`}>TMRW</span>
             )}
             {dayStatus === 'past' && !isActive && (
-              <span className="text-[8px] text-stone-400 mb-0.5"><CheckIcon /></span>
+              <span className="text-[8px] text-[#8E8E93] mb-0.5"><CheckIcon /></span>
             )}
-
-            <span className="text-[11px] font-bold tracking-wide">Day {day.day}</span>
-            <span className={['text-[10px] font-medium mt-0.5', isActive ? 'text-rose-100' : 'text-stone-400'].join(' ')}>
+            <span className="text-[11px] font-bold">Day {day.day}</span>
+            <span className={['text-[10px] font-medium mt-0.5', isActive ? 'text-blue-100' : 'text-[#8E8E93]'].join(' ')}>
               {shortDate(day.date)}
             </span>
           </button>
@@ -303,40 +186,35 @@ function DayTabs({ days, activeDay, onSelect }) {
   )
 }
 
-// ─── Hotel Banner (shown on days 2-5 as persistent home-base reminder) ─────────
+// ─── Hotel Banner ──────────────────────────────────────────────────────────────
 
 function HotelBanner() {
   return (
     <div
-      className="mx-5 mb-1 flex items-center gap-3 px-3.5 py-3 rounded-2xl"
+      className="mx-4 mb-1 flex items-center gap-3 px-4 py-3 rounded-2xl"
       style={{
-        background: 'rgba(99,102,241,0.06)',
-        border: '1px solid rgba(99,102,241,0.15)',
+        background: 'white',
+        border: '1px solid rgba(60,60,67,0.1)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
       }}
     >
       <div
         className="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0"
-        style={{
-          background: 'linear-gradient(135deg, #818cf8, #6366f1)',
-          boxShadow: '0 3px 10px rgba(99,102,241,0.35)',
-        }}
+        style={{ background: 'rgba(99,102,241,0.1)' }}
       >
         🏨
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">Your Hotel</p>
-        <p className="text-[13px] font-bold text-stone-800 truncate">{HOTEL.shortName}</p>
-        <p className="text-[11px] text-stone-400 truncate">{HOTEL.address}</p>
+        <p className="text-[10px] font-bold text-[#6366f1] uppercase tracking-widest mb-0.5">Your Hotel</p>
+        <p className="text-[13px] font-semibold text-[#1C1C1E] truncate">{HOTEL.shortName}</p>
+        <p className="text-[11px] text-[#8E8E93] truncate">{HOTEL.address}</p>
       </div>
       <a
         href={HOTEL.mapsUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-white text-[11px] font-bold active:opacity-75 transition-opacity"
-        style={{
-          background: 'linear-gradient(135deg, #818cf8, #6366f1)',
-          boxShadow: '0 2px 8px rgba(99,102,241,0.3)',
-        }}
+        className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-white text-[11px] font-semibold active:opacity-75 transition-opacity"
+        style={{ background: '#007AFF' }}
       >
         <NavigationIcon />
         Navigate
@@ -349,13 +227,19 @@ function HotelBanner() {
 
 function TBABanner() {
   return (
-    <div className="flex items-center gap-3 px-4 py-4" style={{ background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', borderBottom: '1px solid #fde68a' }}>
-      <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl" style={{ background: 'rgba(245,158,11,0.15)' }}>
+    <div
+      className="flex items-center gap-3 px-4 py-3.5"
+      style={{ background: 'rgba(142,142,147,0.08)', borderBottom: '1px solid rgba(60,60,67,0.08)' }}
+    >
+      <div
+        className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-base"
+        style={{ background: 'rgba(142,142,147,0.12)' }}
+      >
         🕐
       </div>
       <div>
-        <p className="text-sm font-bold text-amber-800">Details coming soon</p>
-        <p className="text-xs text-amber-500 mt-0.5">This stop is still being planned</p>
+        <p className="text-[13px] font-semibold text-[#3C3C43]">Details coming soon</p>
+        <p className="text-[11px] text-[#8E8E93] mt-0.5">This stop is still being planned</p>
       </div>
     </div>
   )
@@ -363,7 +247,7 @@ function TBABanner() {
 
 // ─── Stop Card ─────────────────────────────────────────────────────────────────
 
-function StopCard({ stop, stopNumber, isLast, onPhotoClick }) {
+function StopCard({ stop, stopNumber, isLast }) {
   const [isLocating, setIsLocating] = useState(false)
   const hasPhoto  = stop.photos?.length > 0
   const hasCoords = stop.lat != null && stop.lng != null
@@ -373,14 +257,14 @@ function StopCard({ stop, stopNumber, isLast, onPhotoClick }) {
       {/* Timeline */}
       <div className="flex flex-col items-center flex-shrink-0 pt-0.5">
         <div
-          className="w-7 h-7 rounded-full text-white text-[11px] font-black flex items-center justify-center z-10 flex-shrink-0"
+          className="w-7 h-7 rounded-full text-white text-[11px] font-bold flex items-center justify-center z-10 flex-shrink-0"
           style={stop.isHotel ? {
-            background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)',
-            boxShadow: '0 3px 10px rgba(99,102,241,0.4)',
+            background: '#6366f1',
+            boxShadow: '0 2px 8px rgba(99,102,241,0.35)',
             fontSize: 14,
           } : {
-            background: 'linear-gradient(135deg, #fb7185 0%, #e11d48 100%)',
-            boxShadow: '0 3px 10px rgba(225, 29, 72, 0.4)',
+            background: '#007AFF',
+            boxShadow: '0 2px 8px rgba(0,122,255,0.35)',
           }}
         >
           {stop.isHotel ? '🏨' : stopNumber}
@@ -388,88 +272,70 @@ function StopCard({ stop, stopNumber, isLast, onPhotoClick }) {
         {!isLast && (
           <div
             className="w-px flex-1 mt-2"
-            style={{ background: stop.isHotel ? 'linear-gradient(to bottom, #a5b4fc, transparent)' : 'linear-gradient(to bottom, #fda4af, transparent)' }}
+            style={{ background: 'linear-gradient(to bottom, rgba(0,122,255,0.25), transparent)' }}
           />
         )}
       </div>
 
       {/* Content */}
-      <div className={['flex-1 min-w-0', isLast ? 'pb-2' : 'pb-7'].join(' ')}>
-        {/* Time chip */}
-        <div className="flex items-center gap-1.5 mb-2.5">
-          <span className="text-rose-400"><ClockIcon /></span>
-          <span className="text-[11px] font-bold text-stone-400 tracking-wide">{stop.time}</span>
+      <div className={['flex-1 min-w-0', isLast ? 'pb-2' : 'pb-6'].join(' ')}>
+        {/* Time */}
+        <div className="flex items-center gap-1.5 mb-2">
+          <span style={{ color: '#007AFF' }}><ClockIcon /></span>
+          <span className="text-[11px] font-medium text-[#8E8E93]">{stop.time}</span>
         </div>
 
         {/* Card */}
         <div
           className="bg-white rounded-2xl overflow-hidden"
-          style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}
+          style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)' }}
         >
-          {/* Photo — 16:9 cinematic with gradient + glassmorphism badge */}
+          {/* Static photo — no tap, no overlay */}
           {hasPhoto && (
-            <button
-              onClick={onPhotoClick}
-              className="relative w-full block overflow-hidden"
-              aria-label={`View photos of ${stop.name}`}
-            >
+            <div className="w-full overflow-hidden">
               <img
                 src={stop.photos[0]}
                 alt={stop.name}
                 loading="lazy"
                 decoding="async"
                 className="w-full object-cover"
-                style={{ aspectRatio: '16/9' }}
+                style={{ aspectRatio: '16/9', display: 'block' }}
               />
-              {/* Bottom gradient overlay */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.48) 0%, rgba(0,0,0,0.1) 40%, transparent 70%)' }}
-              />
-              {/* Glassmorphism badge */}
-              <div
-                className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-white"
-                style={{
-                  background: 'rgba(255,255,255,0.18)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                }}
-              >
-                <CameraIcon />
-                <span className="text-[10px] font-bold tracking-wide">View photos</span>
-              </div>
-            </button>
+            </div>
           )}
 
           {/* TBA banner */}
           {stop.isTBA && <TBABanner />}
 
           {/* Text content */}
-          <div className="px-4 pt-3.5 pb-3">
+          <div className="px-4 pt-3 pb-3">
             {stop.isHotel && (
               <div
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest mb-2"
-                style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1' }}
+                className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest mb-2"
+                style={{ background: 'rgba(99,102,241,0.08)', color: '#6366f1' }}
               >
                 Your Hotel · All 5 Nights
               </div>
             )}
-            <h3 className="font-extrabold text-stone-900 text-[15px] leading-snug">{stop.name}</h3>
-            <p className="text-[12.5px] text-stone-500 mt-1.5 leading-relaxed">{stop.description}</p>
+            <h3 className="font-semibold text-[#1C1C1E] text-[15px] leading-snug">{stop.name}</h3>
+            <p className="text-[12.5px] text-[#8E8E93] mt-1 leading-relaxed">{stop.description}</p>
           </div>
 
           {/* Action buttons */}
           {!stop.isTBA && (
             <>
-              <div className="mx-4 h-px bg-stone-100" />
+              <div className="mx-4 h-px" style={{ background: 'rgba(60,60,67,0.1)' }} />
               <div className="flex gap-2 p-3">
                 <a
                   href={getMapsUrl(stop)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-1.5 min-h-[40px] rounded-xl text-[12px] font-semibold text-stone-600 active:opacity-70 transition-opacity"
-                  style={{ background: '#f5f5f4', border: '1px solid #e7e5e4' }}
+                  className="flex-1 flex items-center justify-center gap-1.5 min-h-[40px] rounded-xl text-[12px] font-medium active:opacity-70 transition-opacity"
+                  style={{
+                    color: '#007AFF',
+                    background: 'rgba(0,122,255,0.07)',
+                    border: '1px solid rgba(0,122,255,0.15)',
+                  }}
                 >
                   <ExternalLinkIcon />
                   Open in Maps
@@ -478,13 +344,13 @@ function StopCard({ stop, stopNumber, isLast, onPhotoClick }) {
                   <button
                     onClick={() => handleGetDirections(stop, setIsLocating)}
                     disabled={isLocating}
-                    className="flex-1 flex items-center justify-center gap-1.5 min-h-[40px] rounded-xl text-white text-[12px] font-semibold active:opacity-80 transition-opacity disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-1.5 min-h-[40px] rounded-xl text-white text-[12px] font-medium active:opacity-80 transition-opacity disabled:opacity-50"
                     style={stop.isHotel ? {
-                      background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)',
-                      boxShadow: '0 3px 12px rgba(99,102,241,0.35)',
+                      background: '#6366f1',
+                      boxShadow: '0 2px 8px rgba(99,102,241,0.3)',
                     } : {
-                      background: 'linear-gradient(135deg, #fb7185 0%, #e11d48 100%)',
-                      boxShadow: '0 3px 12px rgba(225,29,72,0.35)',
+                      background: '#007AFF',
+                      boxShadow: '0 2px 8px rgba(0,122,255,0.3)',
                     }}
                   >
                     {isLocating ? <><SpinnerIcon />Locating…</> : <><NavigationIcon />Get Directions</>}
@@ -501,27 +367,29 @@ function StopCard({ stop, stopNumber, isLast, onPhotoClick }) {
 
 // ─── Day View ──────────────────────────────────────────────────────────────────
 
-function DayView({ day, onPhotoClick }) {
+function DayView({ day }) {
   const hasHotelStop   = day.stops.some(s => s.isHotel)
   const confirmedStops = day.stops.filter(s => !s.isTBA).length
 
   return (
-    <div style={{ animation: 'fadeSlideUp 0.32s ease both' }}>
-      {/* Hotel home-base banner on days where hotel isn't a timeline stop */}
+    <div style={{ animation: 'fadeSlideUp 0.28s ease both' }}>
+      {/* Hotel home-base banner on days without hotel stop */}
       {!hasHotelStop && <div className="pt-4"><HotelBanner /></div>}
 
-      {/* Day hero band */}
-      <div
-        className="px-5 pt-5 pb-6 relative overflow-hidden"
-        style={{ background: 'linear-gradient(to bottom, rgba(255,241,242,0.9) 0%, rgba(250,248,245,0) 100%)' }}
-      >
-        <p className="text-[10px] font-black text-rose-400 uppercase tracking-[0.22em] mb-2">{day.date}</p>
+      {/* Day header */}
+      <div className="px-4 pt-5 pb-5">
+        <p
+          className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2"
+          style={{ color: '#007AFF' }}
+        >
+          {day.date}
+        </p>
         <div className="flex items-start justify-between gap-3">
-          <h2 className="text-2xl font-black text-stone-900 leading-tight flex-1">{day.title}</h2>
+          <h2 className="text-[22px] font-bold text-[#1C1C1E] leading-tight flex-1">{day.title}</h2>
           {confirmedStops > 0 && (
             <div
-              className="flex-shrink-0 mt-1 px-2.5 py-1 rounded-full text-[11px] font-bold text-rose-500"
-              style={{ background: 'rgba(225,29,72,0.08)', border: '1px solid rgba(225,29,72,0.15)' }}
+              className="flex-shrink-0 mt-1 px-2.5 py-1 rounded-full text-[11px] font-medium"
+              style={{ background: 'rgba(0,122,255,0.08)', color: '#007AFF', border: '1px solid rgba(0,122,255,0.15)' }}
             >
               {confirmedStops} stop{confirmedStops !== 1 ? 's' : ''}
             </div>
@@ -530,28 +398,32 @@ function DayView({ day, onPhotoClick }) {
       </div>
 
       {/* Timeline */}
-      <div className="px-5 pb-4">
+      <div className="px-4 pb-4">
         {day.stops.map((stop, i) => (
           <StopCard
             key={i}
             stop={stop}
             stopNumber={i + 1}
             isLast={i === day.stops.length - 1}
-            onPhotoClick={stop.photos?.length ? () => onPhotoClick(stop) : undefined}
           />
         ))}
       </div>
 
-      {/* Map section */}
+      {/* Day route map */}
       {day.stops.some(s => s.lat != null) && (
         <div className="pb-8">
-          <div className="flex items-center gap-2 px-5 mb-3">
+          <div className="flex items-center gap-2 px-4 mb-3">
             <div
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full"
-              style={{ background: 'rgba(225,29,72,0.07)', border: '1px solid rgba(225,29,72,0.12)' }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+              style={{ background: 'rgba(0,122,255,0.07)', border: '1px solid rgba(0,122,255,0.12)' }}
             >
-              <span className="text-rose-400"><MapRouteIcon /></span>
-              <span className="text-[11px] font-bold text-rose-500 uppercase tracking-[0.14em]">Today's Route</span>
+              <span style={{ color: '#007AFF' }}><MapRouteIcon /></span>
+              <span
+                className="text-[10px] font-bold uppercase tracking-[0.14em]"
+                style={{ color: '#007AFF' }}
+              >
+                Today's Route
+              </span>
             </div>
           </div>
           <DayMap stops={day.stops} />
@@ -578,7 +450,7 @@ const DOCS = [
     id: 'disneyland',
     emoji: '🎢',
     label: 'Disneyland',
-    color: '#e11d48',
+    color: '#007AFF',
     files: [
       { name: 'Booking Confirmation', url: '/docs/disneyland-confirmation.pdf' },
       { name: 'Ticket · Person 1', url: '/docs/disneyland-ticket-1.pdf' },
@@ -650,25 +522,24 @@ function DocCategory({ cat }) {
   return (
     <div
       className="bg-white rounded-2xl overflow-hidden"
-      style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)' }}
+      style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04)' }}
     >
-      {/* Category header */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-3 px-4 py-3.5 active:bg-stone-50 transition-colors text-left"
+        className="w-full flex items-center gap-3 px-4 py-3.5 active:bg-[#F2F2F7] transition-colors text-left"
       >
         <div
           className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-          style={{ background: `${cat.color}18` }}
+          style={{ background: `${cat.color}14` }}
         >
           {cat.emoji}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-extrabold text-stone-800">{cat.label}</p>
-          <p className="text-[11px] text-stone-400">{cat.files.length} document{cat.files.length !== 1 ? 's' : ''}</p>
+          <p className="text-[13px] font-semibold text-[#1C1C1E]">{cat.label}</p>
+          <p className="text-[11px] text-[#8E8E93]">{cat.files.length} document{cat.files.length !== 1 ? 's' : ''}</p>
         </div>
         <div
-          className="text-stone-400 transition-transform duration-200"
+          className="text-[#8E8E93] transition-transform duration-200"
           style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
@@ -677,28 +548,27 @@ function DocCategory({ cat }) {
         </div>
       </button>
 
-      {/* File list */}
       {open && (
-        <div style={{ borderTop: '1px solid #f5f5f4' }}>
+        <div style={{ borderTop: '1px solid rgba(60,60,67,0.08)' }}>
           {cat.files.map((file, i) => (
             <a
               key={i}
               href={file.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-3 active:bg-stone-50 transition-colors"
-              style={i < cat.files.length - 1 ? { borderBottom: '1px solid #f5f5f4' } : {}}
+              className="flex items-center gap-3 px-4 py-3 active:bg-[#F2F2F7] transition-colors"
+              style={i < cat.files.length - 1 ? { borderBottom: '1px solid rgba(60,60,67,0.08)' } : {}}
             >
               <div
                 className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: `${cat.color}12` }}
+                style={{ background: `${cat.color}10` }}
               >
                 <PdfIcon color={cat.color} />
               </div>
-              <span className="flex-1 text-[13px] font-semibold text-stone-700">{file.name}</span>
+              <span className="flex-1 text-[13px] font-medium text-[#3C3C43]">{file.name}</span>
               <div
-                className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full flex-shrink-0"
-                style={{ background: `${cat.color}12`, color: cat.color }}
+                className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0"
+                style={{ background: `${cat.color}10`, color: cat.color }}
               >
                 <ArrowUpRightIcon />
                 Open
@@ -714,27 +584,27 @@ function DocCategory({ cat }) {
 function DocsPage() {
   const totalDocs = DOCS.reduce((sum, c) => sum + c.files.length, 0)
   return (
-    <div style={{ animation: 'fadeSlideUp 0.32s ease both' }}>
-      {/* Header */}
-      <div
-        className="px-5 pt-5 pb-6"
-        style={{ background: 'linear-gradient(to bottom, rgba(255,241,242,0.9) 0%, rgba(250,248,245,0) 100%)' }}
-      >
-        <p className="text-[10px] font-black text-rose-400 uppercase tracking-[0.22em] mb-2">YOUR FILES</p>
-        <div className="flex items-end justify-between gap-3">
-          <h2 className="text-2xl font-black text-stone-900 leading-tight">Trip Documents</h2>
+    <div style={{ animation: 'fadeSlideUp 0.28s ease both' }}>
+      <div className="px-4 pt-5 pb-5">
+        <p
+          className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2"
+          style={{ color: '#007AFF' }}
+        >
+          Your Files
+        </p>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-[22px] font-bold text-[#1C1C1E]">Trip Documents</h2>
           <div
-            className="flex-shrink-0 mb-1 px-2.5 py-1 rounded-full text-[11px] font-bold text-rose-500"
-            style={{ background: 'rgba(225,29,72,0.08)', border: '1px solid rgba(225,29,72,0.15)' }}
+            className="px-2.5 py-1 rounded-full text-[11px] font-medium"
+            style={{ background: 'rgba(0,122,255,0.08)', color: '#007AFF', border: '1px solid rgba(0,122,255,0.15)' }}
           >
             {totalDocs} files
           </div>
         </div>
-        <p className="text-[12px] text-stone-400 mt-1.5">All bookings & tickets in one place</p>
+        <p className="text-[12px] text-[#8E8E93] mt-1">All bookings & tickets in one place</p>
       </div>
 
-      {/* Categories */}
-      <div className="px-5 pb-8 flex flex-col gap-3">
+      <div className="px-4 pb-8 flex flex-col gap-2.5">
         {DOCS.map(cat => <DocCategory key={cat.id} cat={cat} />)}
       </div>
     </div>
@@ -753,9 +623,9 @@ function BottomNav({ activePage, onSelect }) {
     <nav
       className="flex-shrink-0 flex bg-white"
       style={{
-        borderTop: '1px solid rgba(0,0,0,0.06)',
+        borderTop: '1px solid rgba(60,60,67,0.12)',
         paddingBottom: 'env(safe-area-inset-bottom)',
-        boxShadow: '0 -4px 20px rgba(0,0,0,0.06)',
+        boxShadow: '0 -1px 0 rgba(60,60,67,0.1)',
       }}
     >
       {tabs.map(({ id, label, Icon }) => {
@@ -765,20 +635,17 @@ function BottomNav({ activePage, onSelect }) {
             key={id}
             onClick={() => onSelect(id)}
             className={[
-              'relative flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[56px] transition-colors select-none',
-              isActive ? 'text-rose-500' : 'text-stone-400',
+              'relative flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[56px] transition-colors select-none active:opacity-70',
             ].join(' ')}
+            style={{ color: isActive ? '#007AFF' : '#8E8E93' }}
           >
-            {/* Active indicator pill */}
+            {/* Active indicator */}
             <div
               className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all duration-300 ease-out"
-              style={{
-                width: isActive ? 28 : 0,
-                background: 'linear-gradient(90deg, #fb7185, #e11d48)',
-              }}
+              style={{ width: isActive ? 28 : 0, background: '#007AFF' }}
             />
             <Icon />
-            <span className="text-[10px] font-bold tracking-wide">{label}</span>
+            <span className="text-[10px] font-semibold">{label}</span>
           </button>
         )
       })}
@@ -793,29 +660,32 @@ function MapPage() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Legend */}
       <div
-        className="flex-shrink-0 flex items-center gap-3 px-5 py-3 overflow-x-auto"
+        className="flex-shrink-0 flex items-center gap-2.5 px-4 py-3 overflow-x-auto"
         style={{
           scrollbarWidth: 'none',
           background: 'white',
-          borderBottom: '1px solid rgba(0,0,0,0.06)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+          borderBottom: '1px solid rgba(60,60,67,0.1)',
         }}
       >
         {daysWithCoords.map((day, i) => (
           <div
             key={day.day}
-            className="flex items-center gap-2 flex-shrink-0 px-2.5 py-1 rounded-full"
-            style={{ background: `${DAY_COLORS[i % DAY_COLORS.length]}18`, border: `1px solid ${DAY_COLORS[i % DAY_COLORS.length]}30` }}
+            className="flex items-center gap-1.5 flex-shrink-0 px-2.5 py-1 rounded-full"
+            style={{
+              background: `${DAY_COLORS[i % DAY_COLORS.length]}14`,
+              border: `1px solid ${DAY_COLORS[i % DAY_COLORS.length]}28`,
+            }}
           >
-            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: DAY_COLORS[i % DAY_COLORS.length] }} />
-            <span className="text-[11px] font-bold text-stone-600 whitespace-nowrap">Day {day.day}</span>
+            <div
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ background: DAY_COLORS[i % DAY_COLORS.length] }}
+            />
+            <span className="text-[11px] font-medium text-[#3C3C43] whitespace-nowrap">Day {day.day}</span>
           </div>
         ))}
       </div>
 
-      {/* Full map */}
       <div className="flex-1 min-h-0">
         <AllStopsMap allDays={itinerary} />
       </div>
@@ -826,58 +696,62 @@ function MapPage() {
 // ─── App ───────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [page, setPage]               = useState('trip')
-  const [activeDay, setActiveDay]     = useState(1)
-  const [selectedStop, setSelectedStop] = useState(null)
+  const [page, setPage]           = useState('trip')
+  const [activeDay, setActiveDay] = useState(1)
 
-  const currentDay  = itinerary.find(d => d.day === activeDay)
-  const tripStatus  = getTripStatus()
+  const currentDay = itinerary.find(d => d.day === activeDay)
+  const tripStatus = getTripStatus()
 
   const statusColors = {
-    amber: { bg: '#fef3c7', text: '#92400e' },
-    rose:  { bg: '#ffe4e6', text: '#be123c' },
-    stone: { bg: '#f5f5f4', text: '#78716c' },
+    blue:    { bg: 'rgba(0,122,255,0.1)',     text: '#007AFF' },
+    neutral: { bg: 'rgba(142,142,147,0.12)',  text: '#636366' },
   }
-  const sc = statusColors[tripStatus.variant] ?? statusColors.stone
+  const sc = statusColors[tripStatus.variant] ?? statusColors.neutral
 
   return (
     <div
-      className="flex flex-col bg-[#faf8f5]"
-      style={{ height: '100dvh', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+      className="flex flex-col"
+      style={{
+        height: '100dvh',
+        background: '#F2F2F7',
+        fontFamily: "-apple-system, 'Plus Jakarta Sans', system-ui, sans-serif",
+      }}
     >
       {/* Header */}
       <header
         className="flex-shrink-0 z-20"
         style={{
-          background: 'rgba(255,255,255,0.92)',
+          background: 'rgba(255,255,255,0.94)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(0,0,0,0.06)',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+          borderBottom: '1px solid rgba(60,60,67,0.1)',
         }}
       >
         <div className="max-w-lg mx-auto">
           {/* Brand row */}
-          <div className="px-5 pt-4 pb-2 flex items-center justify-between gap-3">
+          <div
+            className="px-4 flex items-center justify-between gap-3"
+            style={{ paddingTop: 'max(14px, env(safe-area-inset-top))', paddingBottom: 10 }}
+          >
             <div className="flex items-center gap-3 min-w-0">
               <div
-                className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%)', boxShadow: '0 2px 8px rgba(225,29,72,0.2)' }}
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                style={{ background: 'rgba(0,122,255,0.1)' }}
               >
                 🇭🇰
               </div>
               <div className="min-w-0">
-                <h1 className="text-[17px] font-black text-stone-900 leading-none tracking-tight truncate">
-                  Hong Kong Trip
+                <h1 className="text-[15px] font-bold text-[#1C1C1E] leading-tight tracking-tight">
+                  Bais Family Hong Kong Trip
                 </h1>
-                <p className="text-[11px] text-stone-400 font-medium mt-0.5 whitespace-nowrap">
+                <p className="text-[11px] text-[#8E8E93] mt-0.5">
                   Jun 29 – Jul 3, 2026 · 5 days
                 </p>
               </div>
             </div>
-            {/* Trip status chip */}
+            {/* Status chip */}
             <div
-              className="flex-shrink-0 flex items-center gap-1 text-[10px] font-black px-2.5 py-1.5 rounded-full whitespace-nowrap"
+              className="flex-shrink-0 flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1.5 rounded-full whitespace-nowrap"
               style={{ background: sc.bg, color: sc.text }}
             >
               {tripStatus.emoji && <span>{tripStatus.emoji}</span>}
@@ -890,13 +764,13 @@ export default function App() {
             <DayTabs days={itinerary} activeDay={activeDay} onSelect={setActiveDay} />
           )}
           {page === 'docs' && (
-            <div className="px-5 py-3 text-[11px] font-semibold text-stone-400">
-              Tap any file to open it
+            <div className="px-4 pb-3 text-[11px] text-[#8E8E93]">
+              Tap any file to open
             </div>
           )}
 
-          {/* Rose accent stripe */}
-          <div style={{ height: 2, background: 'linear-gradient(90deg, #fb7185, #e11d48 50%, #fda4af)' }} />
+          {/* Blue accent line */}
+          <div style={{ height: 1, background: 'rgba(0,122,255,0.2)' }} />
         </div>
       </header>
 
@@ -904,7 +778,7 @@ export default function App() {
       <main className={['flex-1 min-h-0', page === 'map' ? 'overflow-hidden' : 'overflow-auto'].join(' ')}>
         <div className={['max-w-lg mx-auto', page === 'map' ? 'h-full' : ''].join(' ')}>
           {page === 'trip' && currentDay && (
-            <DayView key={activeDay} day={currentDay} onPhotoClick={setSelectedStop} />
+            <DayView key={activeDay} day={currentDay} />
           )}
           {page === 'map' && <MapPage />}
           {page === 'docs' && <DocsPage />}
@@ -913,11 +787,6 @@ export default function App() {
 
       {/* Bottom nav */}
       <BottomNav activePage={page} onSelect={setPage} />
-
-      {/* Photo gallery modal */}
-      {selectedStop && (
-        <PhotoGalleryModal stop={selectedStop} onClose={() => setSelectedStop(null)} />
-      )}
     </div>
   )
 }
